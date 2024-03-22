@@ -1,0 +1,28 @@
+on:
+  push:
+    branches:
+      - develop
+      - main
+    paths:
+      - "**/*.v*"
+      - "**/*.toml"
+  pull_request:
+    branches:
+      - develop
+      - main
+    paths:
+      - "**/*.v*"
+      - "**/*.toml"
+
+name: FPGA Build Checks
+
+env:
+  TERM: xterm
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: make all

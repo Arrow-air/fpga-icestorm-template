@@ -1,11 +1,12 @@
 PACKAGE_NAME ?=
+BUILD_IMAGE_NAME ?= ghcr.io/arrow-air/tools/arrow-icestorm
+BUILD_IMAGE_TAG ?= latest
 
 # 
 # Update Environment Variables
 # 
-ENV_FILE := $(wildcard .env .env.base)
-
-ifeq ($(ENV_FILE),.env.base)
+ENV_FILE := $(wildcard .env .env.repo)
+ifeq ($(ENV_FILE),.env.repo)
 $(warning Settings file '.env' missing: '$(ENV_FILE)' => installing .env as merge of .env.base + .env.repo!)
 $(shell cat .env.base .env.repo > .env 2>/dev/null)
 endif
@@ -14,6 +15,7 @@ ENV_KEYS=$(shell grep -Ehv '^\s*(\#.*)?\s*$$' .env.base .env.repo 2>/dev/null | 
 $(foreach k, $(ENV_KEYS), $(eval $(shell sh -c "grep -q '^$(k)=' .env 2>/dev/null || (echo '*** NOTE: Adding missing .env key [$(k)] to your .env file!' 1>&2 ; grep -h '^$(k)=' .env.base .env.repo 2>/dev/null >> .env ; grep '^$(k)=' .env 1>&2)")))
 
 -include $(ENV_FILE)
+
 # 
 # End of Update Environment Variables
 # 
@@ -23,7 +25,7 @@ docker_run = docker run --rm \
 	-w /home/$(USER)/project \
 	$(ADDITIONAL_OPT) \
 	-v $(shell pwd):/home/$(USER)/project \
-	-t icestorm:latest \
+	-t ${BUILD_IMAGE_NAME}:${BUILD_IMAGE_TAG} \
 	$(1) $(2)
 
 yosys: src/hdl/top.vhd build_tree
